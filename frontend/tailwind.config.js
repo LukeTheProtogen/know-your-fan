@@ -1,6 +1,6 @@
 module.exports = {
   content: [
-    './src/**/*.{js,jsx,ts,tsx}', // Certifique-se de que só está processando os arquivos na pasta src
+    './src/**/*.{js,jsx,ts,tsx}', 
   ],
   theme: {
     extend: {},
