@@ -9,7 +9,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // Opcional: força o caminho do tsconfig
   esbuild: {
     tsconfigRaw: require('./tsconfig.json'),
   },

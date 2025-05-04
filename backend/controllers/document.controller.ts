@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { extrairTextoDoArquivo } from '../../ocr.service';
 
+
 // Configuração do Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -40,13 +41,14 @@ export const uploadDocumento = async (req: Request, res: Response): Promise<void
     // Aqui você pode fazer validações simples, por exemplo:
     const nomeEsperado = req.body?.nome;
     const cpfEsperado = req.body?.cpf?.replace(/[^\d]/g, '');
-
-    const valido = textoExtraido.includes(nomeEsperado) && textoExtraido.includes(cpfEsperado);
+    const normalizar = (texto: string) => texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const valido = normalizar(textoExtraido).includes(normalizar(nomeEsperado)) && textoExtraido.replace(/[^\d]/g, '').includes(cpfEsperado);
 
     res.status(200).json({
       mensagem: 'Arquivo processado com sucesso!',
       valido,
       textoExtraido
+      
     });
   } catch (err) {
     console.error('Erro no upload:', err);

@@ -1,4 +1,4 @@
-// src/index.ts
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -11,14 +11,14 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json()); // Processa JSON
-app.use(express.urlencoded({ extended: true })); // Processa form-urlencoded
+app.use(express.urlencoded({ extended: true })); 
 
-// Servir arquivos da pasta 'uploads'
+// Aqui eu envio as fotos que são analisadas para a pasta uploads
 app.use('/uploads', express.static('uploads'));
 
-// ✅ Isola as rotas
-app.use('/api/user', userRoutes);       // POST /api/user/
-app.use('/api/documento', documentRoutes); // POST /api/documento/upload
+// Fazendo as rotas dos arquivos
+app.use('/api/user', userRoutes);       // POST /api/user/ (Anotando para o POSTMAN e consultas aqui)
+app.use('/api/documento', documentRoutes); // POST /api/documento/upload (Também estou anotadno para o Postman)
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}, você pode acessar a API pelo POSTMAN!`));

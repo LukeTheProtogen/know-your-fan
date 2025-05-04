@@ -3,6 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 .App {
   text-align: center;
 }
@@ -26,11 +28,11 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: rgb(252, 8, 8);
 }
 
 .App-link {
-  color: #61dafb;
+  color: #ffffff;
 }
 
 @keyframes App-logo-spin {
