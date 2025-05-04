@@ -19,6 +19,7 @@ export default function App() {
   const [documentoPreview, setDocumentoPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [mensagemStatus, setMensagemStatus] = useState<string>('');
+  const [cpfExtraido, setCpfExtraido] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,54 +27,47 @@ export default function App() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    const redes = formData.redesSociais.split(',').map(item => item.trim());
-    const esports = formData.linksEsports.split(',').map(item => item.trim());
-  
-    const urlRegex = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
-    const esportesPermitidos = ['faceit.com', 'esportal.com', 'challengermode.com'];
-  
-    const redesInvalidas = redes.some(url => url && !urlRegex.test(url));
-    const esportsInvalidos = esports.some(url =>
-      !urlRegex.test(url) || !esportesPermitidos.some(d => url.includes(d))
-    );
-  
-    if (redesInvalidas || esportsInvalidos) {
-      alert('⚠️ Verifique os links informados:\n- URLs devem ser válidas.\n- Links de e-sports devem ser de: faceit.com, esportal.com ou challengermode.com');
-      return;
-    }
-  
-    const payload = {
-      ...formData,
-      interesses: formData.interesses.split(',').map(item => item.trim()),
-      atividades: formData.atividades.split(',').map(item => item.trim()),
-      eventos: formData.eventos.split(',').map(item => item.trim()),
-      compras: formData.compras.split(',').map(item => item.trim()),
-      redesSociais: redes,
-      linksEsports: esports
-    };
-  
+
     try {
+      if (!(cpfExtraido || formData.cpf)) {
+        alert('CPF não detectado no documento nem preenchido manualmente.');
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        interesses: formData.interesses.split(',').map(item => item.trim()),
+        atividades: formData.atividades.split(',').map(item => item.trim()),
+        eventos: formData.eventos.split(',').map(item => item.trim()),
+        compras: formData.compras.split(',').map(item => item.trim()),
+        redesSociais: formData.redesSociais.split(',').map(item => item.trim()),
+        linksEsports: formData.linksEsports.split(',').map(item => item.trim()),
+        cpf: cpfExtraido || formData.cpf || ''
+      };
+
       const res = await fetch('http://localhost:4000/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-  
+
       const data = await res.json();
-  
-      if (!res.ok) {
-        throw new Error(`Erro do servidor: ${res.status} - ${JSON.stringify(data)}`);
+
+      if (res.ok) {
+        alert(data.mensagem || "Fã cadastrado com sucesso!");
+      } else {
+        alert("Erro: " + JSON.stringify(data.erro || data || "Erro desconhecido"));
       }
-  
-      alert(data.mensagem);
     } catch (err) {
-      alert('Erro ao enviar dados: ' + err);
+      console.error('Erro na requisição:', err);
+      alert("Erro ao enviar o formulário.");
     }
   };
 
+
   const handleDocumentoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
+      
       const file = e.target.files[0];
       setDocumentoPreview(URL.createObjectURL(file));
       setUploadProgress(0);
@@ -96,6 +90,8 @@ export default function App() {
 
       xhr.onload = () => {
         const response = JSON.parse(xhr.responseText);
+        const cpfMatch = response.textoExtraido?.match(/\d{3}[.\-]?\d{3}[.\-]?\d{3}[.\-]?\d{2}/);
+        setCpfExtraido(cpfMatch?.[0] ?? '');
         setMensagemStatus(response.valido
           ? '✅ Documento válido!\nTexto extraído: ' + response.textoExtraido
           : '❌ Documento inválido!\nTexto extraído: ' + response.textoExtraido);

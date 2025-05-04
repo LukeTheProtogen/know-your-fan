@@ -12,9 +12,6 @@ const dominiosEsports = [
 
 // Validação customizada para links de e-sports
 const validarLinkEsports = (url: string) => {
-
-    
-
   try {
     const parsedUrl = new URL(url);
     return dominiosEsports.some(d => parsedUrl.hostname.includes(d));
@@ -47,16 +44,6 @@ const fanSchema = z.object({
     })
 });
 
-// Validação de relevância dos links de redes sociais
-function verificarRelevanciaRedesSociais(links: string[]): boolean {
-    const palavrasChave = ['furia', 'esports', 'csgo', 'valorant', 'lol', 'e-sports'];
-    return links.some(link =>
-      palavrasChave.some(palavra =>
-        link.toLowerCase().includes(palavra)
-      )
-    );
-  }
-
 // Função assíncrona para cadastrar usuário
 export const cadastrarUsuario = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   if (!req.body || !req.body.cpf) {
@@ -71,7 +58,7 @@ export const cadastrarUsuario = async (req: Request, res: Response, next: NextFu
     // Valida os dados com Zod
     const dadosValidados = fanSchema.parse(req.body);
 
-    // Verifica relevância dos links de redes sociais (Não é obrigatório :DDDDDD)
+    // Verifica relevância dos links de redes sociais
     if (dadosValidados.redesSociais && dadosValidados.redesSociais.length > 0) {
       const relevante = verificarRelevanciaRedesSociais(dadosValidados.redesSociais);
       if (!relevante) {
@@ -96,3 +83,12 @@ export const cadastrarUsuario = async (req: Request, res: Response, next: NextFu
   }
 };
 
+// Função para verificar a relevância dos links de redes sociais
+function verificarRelevanciaRedesSociais(links: string[]): boolean {
+  const palavrasChave = ['furia', 'esports', 'csgo', 'valorant', 'lol', 'e-sports'];
+  return links.some(link =>
+    palavrasChave.some(palavra =>
+      link.toLowerCase().includes(palavra)
+    )
+  );
+}
