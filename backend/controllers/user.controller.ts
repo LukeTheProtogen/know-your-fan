@@ -41,13 +41,10 @@ const fanSchema = z.object({
   linksEsports: z.array(z.string().url("URL inválida"))
     .optional()
     .refine((links) => {
-      if (!links) return true;
-      return links.every(validarLinkEsports);
+      return (links ?? []).every(link => validarLinkEsports(link));
     }, {
-      message: "Todos os links devem ser de plataformas de e-sports (faceit.com, esportal.com, challengermode.com)"
+      message: "Os links fornecidos não são válidos ou não estão relacionados a e-sports.",
     })
-
-    
 });
 
 // Validação de relevância dos links de redes sociais
@@ -62,41 +59,40 @@ function verificarRelevanciaRedesSociais(links: string[]): boolean {
 
 // Função assíncrona para cadastrar usuário
 export const cadastrarUsuario = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (!req.body || !req.body.cpf) {
-      res.status(400).json({ erro: 'O campo CPF é obrigatório.' });
-      return;
-    }
-  
-    try {
-      // Remove pontuação do CPF
-      req.body.cpf = req.body.cpf.replace(/[^\d]+/g, '');
-  
-      // Valida os dados com Zod
-      const dadosValidados = fanSchema.parse(req.body);
-  
-      // Verifica relevância dos links de redes sociais
-      if (dadosValidados.redesSociais && dadosValidados.redesSociais.length > 0) {
-        const relevante = verificarRelevanciaRedesSociais(dadosValidados.redesSociais);
-        if (!relevante) {
-          res.status(400).json({ erro: 'Os links fornecidos não parecem estar relacionados a e-sports.' });
-          return;
-        }
-      }
-  
-      // Salva no Firebase
-      await db.collection('usuarios').add(dadosValidados);
-  
-      res.status(201).json({
-        mensagem: 'Fã cadastrado com sucesso!',
-        dados: dadosValidados,
-      });
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        res.status(400).json({ erro: err.errors });
-      } else {
-        console.error('Erro ao cadastrar:', err);
-        res.status(500).json({ erro: 'Erro interno do servidor.' });
+  if (!req.body || !req.body.cpf) {
+    res.status(400).json({ erro: 'O campo CPF é obrigatório.' });
+    return;
+  }
+
+  try {
+    // Remove pontuação do CPF
+    req.body.cpf = req.body.cpf.replace(/[^\d]+/g, '');
+
+    // Valida os dados com Zod
+    const dadosValidados = fanSchema.parse(req.body);
+
+    // Verifica relevância dos links de redes sociais (Não é obrigatório :DDDDDD)
+    if (dadosValidados.redesSociais && dadosValidados.redesSociais.length > 0) {
+      const relevante = verificarRelevanciaRedesSociais(dadosValidados.redesSociais);
+      if (!relevante) {
+        console.warn('Links de redes sociais não parecem relevantes. Continuando mesmo assim por serem opcionais.');
       }
     }
-  };
+
+    // Salvando no Firebase
+    await db.collection('usuarios').add(dadosValidados);
+
+    res.status(201).json({
+      mensagem: 'Fã cadastrado com sucesso!',
+      dados: dadosValidados,
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      res.status(400).json({ erro: err.errors });
+    } else {
+      console.error('Erro ao cadastrar:', err);
+      res.status(500).json({ erro: 'Erro interno do servidor.' });
+    }
+  }
+};
 

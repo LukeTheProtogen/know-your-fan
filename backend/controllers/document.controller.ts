@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
-import { extrairTextoDoArquivo } from '../../ocr.service';
+import { extrairTextoDoArquivo } from '../services/ocr.service';
 
 
 // Configuração do Multer
