@@ -133,7 +133,6 @@ Se você encontrar algum erro durante o processo, ou acredita que algo precisa d
 4. Envie as suas alterações: `git push origin my-feature`
 
 
-## 👤 Autor
 <h2 id="autor">👤 Autor</h2>
 
 <a href="https://br.linkedin.com/in/lucasgossdias-"><br>
